@@ -12,10 +12,8 @@
 //    '  `'-'` '   .'|  '/'  `'-'` '   .'|  '/                        |_|      '    \  \  \.'   \_.'   
 //              `-'  `--'           `-'  `--'                                 '------'  '---'          
 
-
 using PasswordManager.Crypto;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 
 namespace PasswordManager.Vault;
@@ -36,12 +34,53 @@ public class Vault
     {
         var salt = RandomNumberGenerator.GetBytes(16);
         var key = Argon2Kdf.DeriveKey(password, salt);
-
         return new Vault(salt, key);
+    }
+
+    public static Vault Load(ReadOnlySpan<char> password, string path)
+    {
+        var fileData = VaultFile.Read(path);
+        var masterKey = Argon2Kdf.DeriveKey(password, fileData.Salt);
+
+        var plaintext = AesGcmCrypto.Decrypt(
+            fileData.Ciphertext,
+            masterKey,
+            fileData.Nonce,
+            fileData.Tag);
+
+        var entries = JsonSerializer.Deserialize<List<VaultEntry>>(plaintext) ?? new();
+        SecureMemory.Wipe(plaintext);
+
+        var vault = new Vault(fileData.Salt, masterKey);
+        vault._entries.AddRange(entries);
+        return vault;
     }
 
     public void AddEntry(string site, string username, string password)
         => _entries.Add(new VaultEntry(site, username, password));
+
+    public bool UpdateEntry(string site, string username, string password)
+    {
+        var index = _entries.FindIndex(e => e.Site.Equals(site, StringComparison.OrdinalIgnoreCase));
+        if (index < 0) return false;
+
+        _entries[index] = new VaultEntry(site, username, password);
+        return true;
+    }
+
+    public bool DeleteEntry(string site)
+    {
+        var index = _entries.FindIndex(e => e.Site.Equals(site, StringComparison.OrdinalIgnoreCase));
+        if (index < 0) return false;
+
+        _entries.RemoveAt(index);
+        return true;
+    }
+
+    public IEnumerable<VaultEntry> ListEntries() => _entries.AsReadOnly();
+
+    public VaultEntry? FindEntry(string site)
+        => _entries.FirstOrDefault(e => e.Site.Equals(site, StringComparison.OrdinalIgnoreCase));
 
     public void Save(string path)
     {
@@ -54,43 +93,6 @@ public class Vault
             out var tag);
 
         VaultFile.Write(path, _salt, nonce, ciphertext, tag);
-
         SecureMemory.Wipe(json);
     }
-
-    public static Vault Load(ReadOnlySpan<char> password, string path)
-    {
-        var fileData = VaultFile.Read(path);
-
-        var masterKey = Argon2Kdf.DeriveKey(password, fileData.Salt);
-
-        try
-        {
-            var plaintext = AesGcmCrypto.Decrypt(
-                fileData.Ciphertext,
-                masterKey,
-                fileData.Nonce,
-                fileData.Tag);
-
-            var entries = JsonSerializer.Deserialize<List<VaultEntry>>(plaintext)
-                          ?? new List<VaultEntry>();
-
-            var vault = new Vault(fileData.Salt, masterKey);
-            vault._entries.AddRange(entries);
-
-            SecureMemory.Wipe(plaintext);
-            return vault;
-        }
-        catch (CryptographicException)
-        {
-            SecureMemory.Wipe(masterKey);
-            throw new InvalidOperationException("Incorrect password or corrupted vault.");
-        }
-    }
-
-    public IEnumerable<VaultEntry> ListEntries() => _entries.AsReadOnly();
-
-    public VaultEntry? FindEntry(string site)
-        => _entries.FirstOrDefault(e => e.Site.Equals(site, StringComparison.OrdinalIgnoreCase));
 }
-
