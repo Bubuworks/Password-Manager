@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace SecurePasswordManager.Crypto;
+namespace PasswordManager.Crypto;
 
 public static class DpapiStore
 {
@@ -9,4 +9,5 @@ public static class DpapiStore
 
     public static byte[] Unprotect(byte[] data)
         => ProtectedData.Unprotect(data, null, DataProtectionScope.CurrentUser);
+
 }
