@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace SecurePasswordManager.Crypto;
+namespace PasswordManager.Crypto;
 
 public static class SecureMemory
 {
@@ -14,4 +14,5 @@ public static class SecureMemory
         for (int i = 0; i < buffer.Length; i++)
             buffer[i] = '\0';
     }
+
 }
