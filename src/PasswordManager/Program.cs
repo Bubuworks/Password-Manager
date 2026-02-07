@@ -12,56 +12,122 @@
 //    '  `'-'` '   .'|  '/'  `'-'` '   .'|  '/                        |_|      '    \  \  \.'   \_.'   
 //              `-'  `--'           `-'  `--'                                 '------'  '---'          
 
-
 using SecurePasswordManager.Vault;
 
 const string VaultPath = "vault.bin";
 
+Console.WriteLine("=== Password Manager ===\n");
+
 Console.Write("Master password: ");
-var password = ReadPassword();
+var masterPassword = ReadPassword();
 
 Vault vault;
-
 try
 {
     if (File.Exists(VaultPath))
     {
-        vault = Vault.Load(password, VaultPath);
-        Console.WriteLine("Vault loaded successfully.");
+        vault = Vault.Load(masterPassword, VaultPath);
+        Console.WriteLine("Vault unlocked.\n");
     }
     else
     {
-        vault = Vault.CreateNew(password);
-        Console.WriteLine("New vault created.");
+        vault = Vault.CreateNew(masterPassword);
+        Console.WriteLine("New vault created.\n");
     }
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Error opening vault: {ex.Message}");
+    Console.WriteLine($"Failed to open vault: {ex.Message}");
     return;
 }
 
-Console.Write("Site: ");
-var site = Console.ReadLine() ?? "";
-
-Console.Write("Username: ");
-var username = Console.ReadLine() ?? "";
-
-Console.Write("Password: ");
-var entryPassword = ReadPassword();
-
-vault.AddEntry(site, username, new string(entryPassword));
-
-vault.Save(VaultPath);
-Console.WriteLine("Vault saved.");
-
-Console.WriteLine("\nVault entries:");
-foreach (var entry in vault.ListEntries())
+bool running = true;
+while (running)
 {
-    Console.WriteLine($"- {entry.Site} ({entry.Username})");
+    ShowMenu();
+    Console.Write("Select option: ");
+    var choice = Console.ReadLine();
+
+    switch (choice)
+    {
+        case "1":
+            AddEntry(vault);
+            break;
+        case "2":
+            ListEntries(vault);
+            break;
+        case "3":
+            ViewEntry(vault);
+            break;
+        case "4":
+            vault.Save(VaultPath);
+            Console.WriteLine("Vault saved. Goodbye.");
+            running = false;
+            break;
+        default:
+            Console.WriteLine("Invalid option.\n");
+            break;
+    }
 }
 
-Console.WriteLine("\nDone.");
+static void ShowMenu()
+{
+    Console.WriteLine("""
+    1) Add entry
+    2) List entries
+    3) View entry password
+    4) Save & exit
+    """);
+}
+
+static void AddEntry(Vault vault)
+{
+    Console.Write("Site: ");
+    var site = Console.ReadLine() ?? "";
+
+    Console.Write("Username: ");
+    var username = Console.ReadLine() ?? "";
+
+    Console.Write("Password: ");
+    var password = ReadPassword();
+
+    vault.AddEntry(site, username, new string(password));
+    Console.WriteLine("Entry added.\n");
+}
+
+static void ListEntries(Vault vault)
+{
+    var entries = vault.ListEntries().ToList();
+
+    if (entries.Count == 0)
+    {
+        Console.WriteLine("Vault is empty.\n");
+        return;
+    }
+
+    Console.WriteLine("Stored entries:");
+    foreach (var entry in entries)
+    {
+        Console.WriteLine($"- {entry.Site} ({entry.Username})");
+    }
+    Console.WriteLine();
+}
+
+static void ViewEntry(Vault vault)
+{
+    Console.Write("Site to view: ");
+    var site = Console.ReadLine() ?? "";
+
+    var entry = vault.FindEntry(site);
+    if (entry == null)
+    {
+        Console.WriteLine("Entry not found.\n");
+        return;
+    }
+
+    Console.WriteLine($"Username: {entry.Username}");
+    Console.WriteLine($"Password: {entry.Password}\n");
+}
 
 static char[] ReadPassword()
 {
