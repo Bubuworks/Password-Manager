@@ -1,9 +1,9 @@
-using SecurePasswordManager.Crypto;
+using PasswordManager.Crypto;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace SecurePasswordManager.Vault;
+namespace PasswordManager.Vault;
 
 public class Vault
 {
