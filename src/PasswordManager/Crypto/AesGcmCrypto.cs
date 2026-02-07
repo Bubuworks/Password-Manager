@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace SecurePasswordManager.Crypto;
+namespace PasswordManager.Crypto;
 
 public static class AesGcmCrypto
 {
@@ -33,4 +33,5 @@ public static class AesGcmCrypto
 
         return plaintext;
     }
+
 }
