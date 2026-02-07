@@ -12,7 +12,7 @@
 //    '  `'-'` '   .'|  '/'  `'-'` '   .'|  '/                        |_|      '    \  \  \.'   \_.'   
 //              `-'  `--'           `-'  `--'                                 '------'  '---'          
 
-using SecurePasswordManager.Vault;
+using PasswordManager.Vault;
 
 const string VaultPath = "vault.bin";
 
