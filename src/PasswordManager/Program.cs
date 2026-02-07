@@ -22,9 +22,9 @@ using System.Threading.Tasks;
 using System.IO;
 
 const string VaultPath = "vault.bin";
-const int AutoLockTimeoutMs = 60000;  // 1 minute auto-lock timeout
+const int AutoLockTimeoutMs = 60000;
 
-int ClipboardTimeoutMs = 10000;  // Default clipboard timeout in ms (10 seconds)
+int ClipboardTimeoutMs = 10000;
 
 Vault vault;
 Console.Write("Master password: ");
