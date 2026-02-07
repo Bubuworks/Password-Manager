@@ -1,4 +1,4 @@
-using SecurePasswordManager.Vault;
+using PasswordManager.Vault;
 
 Console.Write("Master password: ");
 var password = ReadPassword();
