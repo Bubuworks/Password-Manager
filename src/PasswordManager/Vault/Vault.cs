@@ -1,3 +1,18 @@
+//                                                         .-'''-.                                     
+//                                                        '   _    \                                   
+//    /|                  /|                            /   /` '.   \              .                   
+//    ||                  ||                    _     _.   |     \  '            .'|                   
+//    ||                  ||              /\    \\   //|   '      |  '.-,.--.  .'  |                   
+//    ||  __              ||  __          `\\  //\\ // \    \     / / |  .-. |<    |                   
+//    ||/'__ '.   _    _  ||/'__ '.   _    _\`//  \'/   `.   ` ..' /  | |  | | |   | ____         _    
+//    |:/`  '. ' | '  / | |:/`  '. ' | '  / |\|   |/       '-...-'`   | |  | | |   | \ .'       .' |   
+//    ||     | |.' | .' | ||     | |.' | .' | '                       | |  '-  |   |/  .       .   | / 
+//    ||\    / '/  | /  | ||\    / '/  | /  |                         | |      |    /\  \    .'.'| |// 
+//    |/\'..' /|   `'.  | |/\'..' /|   `'.  |                         | |      |   |  \  \ .'.'.-'  /  
+//    '  `'-'` '   .'|  '/'  `'-'` '   .'|  '/                        |_|      '    \  \  \.'   \_.'   
+//              `-'  `--'           `-'  `--'                                 '------'  '---'          
+
+
 using PasswordManager.Crypto;
 using System.Security.Cryptography;
 using System.Text;
@@ -78,3 +93,4 @@ public class Vault
     public VaultEntry? FindEntry(string site)
         => _entries.FirstOrDefault(e => e.Site.Equals(site, StringComparison.OrdinalIgnoreCase));
 }
+
